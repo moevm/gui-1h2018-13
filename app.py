@@ -8,6 +8,9 @@ from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
 class LogInView(QWebEngineView):
+    """
+    This is class where user can login
+    """
     appId = 6390333
     appPermission = 524288
 
@@ -19,8 +22,11 @@ class LogInView(QWebEngineView):
         self.loadAuthPage()
         self.urlChanged.connect(self.onUrlChanged)
 
-    @Slot(QUrl)
+    @Slot(QUrl, name='onUrlChanged')
     def onUrlChanged(self, newUrl: QUrl):
+        """
+        URL changed handler.
+        """
         url = QUrl(newUrl.toString().replace('#', '?'))
 
         print(f'url was changed to {url.toString()}')
@@ -33,6 +39,9 @@ class LogInView(QWebEngineView):
                 print(f'TOKEN: {token}')
 
     def loadAuthPage(self):
+        """
+        This method loads auth page, so user can login in VK.
+        """
         url = QUrl('https://oauth.vk.com/authorize')
         query = QUrlQuery()
 
@@ -49,10 +58,16 @@ class LogInView(QWebEngineView):
 
 
 class Widget(QWidget):
+    """
+    This class is the main class of the application.
+    """
     webView = None
 
-    @Slot(name="closeLogInView")
+    @Slot(name='closeLogInView')
     def closeLogInView(self):
+        """
+        This slot closes the login view, when token is being taken.
+        """
         print('Closing LogInWidget...')
         self.webView.close()
         self.webView.tokenTaken.disconnect(self.closeLogInView)
