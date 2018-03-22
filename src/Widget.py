@@ -1,36 +1,45 @@
 import logging
 from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtCore import pyqtSignal as Signal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout
 from .LogInView import LogInView
-from .VKApi import VKApi 
+from .VKApi import VKApi
+from .ChatWidget import ChatWidget
+from .DialogsWidget import DialogsWidget
 
 
 class Widget(QWidget):
     """
     This class is the main class of the application.
     """
-    logger = logging.getLogger(name='Widget')
-    webView = None
-    api = None
+    log = logging.getLogger(name='Widget')
+    __webView = None
+    __api = None
+    __chatWidget = None
+    __dialogsWidget = None
 
     @Slot(name='closeLogInView')
     def closeLogInView(self):
         """
         This slot closes the login view, when token is being taken.
         """
-        self.webView.close()
-        self.webView.tokenTaken.disconnect(self.closeLogInView)
-        self.webView = None
-        self.logger.info('LogInView is to delete.')
+        self.__webView.close()
+        self.__webView.tokenTaken.disconnect(self.closeLogInView)
+        self.__webView = None
+        self.log.info('LogInView is to delete.')
+        self.__chatWidget = ChatWidget(self)
+        self.__dialogsWidget = DialogsWidget(self)
+        self.setLayout(QHBoxLayout(self))
+        self.layout().addWidget(self.__dialogsWidget)
+        self.layout().addWidget(self.__chatWidget)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        api = VKApi(self)
-        self.logger.info('Creating main Widget...')
+        __api = VKApi(self)
+        self.log.info('Creating main Widget...')
         self.setWindowTitle('Messenger')
         self.setLayout(QHBoxLayout())
-        self.webView = LogInView(self)
-        self.webView.tokenTaken.connect(api.takeToken)
-        self.webView.tokenTaken.connect(self.closeLogInView)
-        self.layout().addWidget(self.webView)
+        self.__webView = LogInView(self)
+        self.__webView.tokenTaken.connect(__api.takeToken)
+        self.__webView.tokenTaken.connect(self.closeLogInView)
+        self.layout().addWidget(self.__webView)

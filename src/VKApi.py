@@ -9,16 +9,16 @@ class VKApi(QObject):
     """
     VK interaction class.
     """
-    logger = logging.getLogger(name='VKApi')
+    log = logging.getLogger(name='VKApi')
 
     @Slot(str, name='takeToken')
     def takeToken(self, token):
-        self.token = token
-        self.logger.info(f'Token in API: {self.token}')
-        self.session = vk.Session(access_token=token)
-        self.logger.info(f'Session: {self.session}')
-        self.api = vk.API(self.session)
-        self.logger.info(f'API: {self.api}')
+        self.__token = token
+        self.log.info(f'Token in API: {self.__token}')
+        self.__session = vk.Session(access_token=token)
+        self.log.info(f'Session: {self.__session}')
+        self.__api = vk.API(self.__session)
+        self.log.info(f'API: {self.__api}')
 
     def __init__(self, parent=None):
         super().__init__(parent)

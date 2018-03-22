@@ -4,13 +4,14 @@ from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import QUrl, QUrlQuery
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
+
 class LogInView(QWebEngineView):
     """
     This is class where user can login
     """
-    logger = logging.getLogger(name='LogInView')
-    appId = 6390333
-    appPermission = ['friends', 'photos', 'pages', 'status', 'messages', 'notifications']
+    log = logging.getLogger(name='LogInView')
+    __appId = 6390333
+    __appPermission = ['friends', 'photos', 'pages', 'status', 'messages', 'notifications']
 
     tokenTaken = Signal(str)
 
@@ -26,7 +27,7 @@ class LogInView(QWebEngineView):
         """
         url = QUrl(newUrl.toString().replace('#', '?'))
 
-        self.logger.info(f'url was changed to {url.toString()}')
+        self.log.info(f'url was changed to {url.toString()}')
         if url.hasQuery():
             query = QUrlQuery(url.query())
             if query.hasQueryItem('access_token'):
@@ -41,10 +42,10 @@ class LogInView(QWebEngineView):
         url = QUrl('https://oauth.vk.com/authorize')
         query = QUrlQuery()
 
-        query.addQueryItem('client_id', str(self.appId))
+        query.addQueryItem('client_id', str(self.__appId))
         query.addQueryItem('redirect_uri', 'https://oauth.vk.com/blank.html')
         query.addQueryItem('display', 'mobile')
-        query.addQueryItem('scope', ','.join(self.appPermission))
+        query.addQueryItem('scope', ','.join(self.__appPermission))
         query.addQueryItem('response_type', 'token')
         query.addQueryItem('v', '5.73')
         query.addQueryItem('revoke', '1')
