@@ -29,9 +29,9 @@ class Widget(QWidget):
         self.log.info('LogInView is to delete.')
         self.__chatWidget = ChatWidget(self)
         self.__dialogsWidget = DialogsWidget(self)
-        self.setLayout(QHBoxLayout(self))
         self.layout().addWidget(self.__dialogsWidget)
         self.layout().addWidget(self.__chatWidget)
+        self.__api = VKApi(parent=self)
 
     def __init__(self, parent=None):
         super().__init__(parent)
