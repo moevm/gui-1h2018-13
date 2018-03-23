@@ -1,5 +1,5 @@
 import logging
-from PyQt5.QtWidgets import QWidget, QListWidget, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import (QWidget, QListWidget, QVBoxLayout, QPushButton)
 
 
 class DialogsWidget(QWidget):

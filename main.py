@@ -3,6 +3,7 @@ import logging
 from PyQt5.QtWidgets import QApplication
 from src.Widget import Widget
 
+
 def main():
     app = QApplication(sys.argv)
     logging.basicConfig(level=logging.INFO)

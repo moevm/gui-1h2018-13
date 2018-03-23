@@ -18,6 +18,11 @@ class Widget(QWidget):
     __chatWidget = None
     __dialogsWidget = None
 
+    @Slot(str, name='setNameAsTitle')
+    def setNameAsTitle(self, title):
+        self.log.info(f'New title: {str}')
+        self.setWindowTitle(title)
+
     @Slot(name='closeLogInView')
     def closeLogInView(self):
         """
@@ -31,15 +36,15 @@ class Widget(QWidget):
         self.__dialogsWidget = DialogsWidget(self)
         self.layout().addWidget(self.__dialogsWidget)
         self.layout().addWidget(self.__chatWidget)
-        self.__api = VKApi(parent=self)
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        __api = VKApi(self)
+        self.__api = VKApi(self)
         self.log.info('Creating main Widget...')
         self.setWindowTitle('Messenger')
         self.setLayout(QHBoxLayout())
         self.__webView = LogInView(self)
-        self.__webView.tokenTaken.connect(__api.takeToken)
+        self.__api.changeTitle.connect(self.setNameAsTitle)
+        self.__webView.tokenTaken.connect(self.__api.takeToken)
         self.__webView.tokenTaken.connect(self.closeLogInView)
         self.layout().addWidget(self.__webView)
