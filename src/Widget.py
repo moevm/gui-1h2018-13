@@ -1,11 +1,13 @@
 import logging
-from PyQt5.QtCore import pyqtSlot as Slot
+
 from PyQt5.QtCore import pyqtSignal as Signal
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QBoxLayout
-from .LogInView import LogInView
-from .VKApi import VKApi
+from PyQt5.QtCore import pyqtSlot as Slot
+from PyQt5.QtWidgets import QWidget, QHBoxLayout
+
 from .ChatWidget import ChatWidget
 from .DialogsWidget import DialogsWidget
+from .LogInView import LogInView
+from .VKApi import VKApi
 
 
 class Widget(QWidget):
@@ -18,10 +20,28 @@ class Widget(QWidget):
     __chatWidget = None
     __dialogsWidget = None
 
-    @Slot(str, name='setNameAsTitle')
-    def setNameAsTitle(self, title):
+    updateTitle = Signal()
+    updateDialogs = Signal(int, int, bool)
+    updateMessages = Signal(int, int)
+
+    @Slot(name='onInitialized')
+    def onInitialized(self):
+        self.updateTitle.emit()
+        self.updateMessages.emit(0, 10)
+        self.updateDialogs.emit(0, 10, True)
+
+    @Slot(str, name='onChangeTitle')
+    def onChangeTitle(self, title):
         self.log.info(f'New title: {str}')
         self.setWindowTitle(title)
+
+    @Slot(dict, name='onChangeDialogs')
+    def onChangeDialogs(self, dialogs):
+        self.log.info(f'New dialogs: {dialogs}')
+
+    @Slot(dict, name='onChangeMessages')
+    def onChangeMessages(self, messages):
+        self.log.info(f'New messages: {messages}')
 
     @Slot(name='closeLogInView')
     def closeLogInView(self):
@@ -44,7 +64,15 @@ class Widget(QWidget):
         self.setWindowTitle('Messenger')
         self.setLayout(QHBoxLayout())
         self.__webView = LogInView(self)
-        self.__api.changeTitle.connect(self.setNameAsTitle)
+
+        self.__api.initialized.connect(self.onInitialized)
+        self.__api.changeMessages.connect(self.onChangeMessages)
+        self.__api.changeDialogs.connect(self.onChangeDialogs)
+        self.__api.changeTitle.connect(self.onChangeTitle)
+        self.updateDialogs.connect(self.__api.onUpdateDialogs)
+        self.updateMessages.connect(self.__api.onUpdateMessages)
+        self.updateTitle.connect(self.__api.onUpdateTitle)
         self.__webView.tokenTaken.connect(self.__api.takeToken)
         self.__webView.tokenTaken.connect(self.closeLogInView)
+
         self.layout().addWidget(self.__webView)
