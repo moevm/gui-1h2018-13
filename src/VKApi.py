@@ -37,7 +37,7 @@ class VKApi(QObject):
     def onUpdateDialogs(self, offset, count, unread):
         @makeRequest
         def req():
-            dialogs = self.__api.messages.getDialogs(offset=offset, count=count, unread=unread, v=5.73)
+            dialogs = self.__api.messages.getDialogs(preview_length=30, offset=offset, count=count, unread=unread, v=5.73)
             self.log.info(f'dialogs: {dialogs}')
             self.changeDialogs.emit(dialogs)
 

@@ -7,7 +7,7 @@ def makeRequest(function, *args, **kwargs):
     make reques async like without loop.
     """
 
-    def newFunc():
+    def newFunc(*args, **kwargs):
         def wrapper():
             function(*args, **kwargs)
 

@@ -2,7 +2,8 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListWidgetItem
+from PyQt5.QtCore import QTimer
 
 from .ChatWidget import ChatWidget
 from .DialogsWidget import DialogsWidget
@@ -19,6 +20,7 @@ class Widget(QWidget):
     __api = None
     __chatWidget = None
     __dialogsWidget = None
+    __updateTimer = None
 
     updateTitle = Signal()
     updateDialogs = Signal(int, int, bool)
@@ -27,8 +29,18 @@ class Widget(QWidget):
     @Slot(name='onInitialized')
     def onInitialized(self):
         self.updateTitle.emit()
-        self.updateMessages.emit(0, 10, 183161122)
-        self.updateDialogs.emit(0, 10, True)
+        self.updateDialogs.emit(0, 10, False)
+        self.__updateTimer = QTimer(self)
+        self.__updateTimer.setInterval(1000)
+        self.__updateTimer.timeout.connect(self.onTimeout)
+        self.__updateTimer.start()
+
+    @Slot(name='onTimeout')
+    def onTimeout(self):
+        self.log.info('\tTIMEOUT STARTS')
+        self.updateTitle.emit()
+        self.updateDialogs.emit(0, 10, False)
+        self.log.info('\tTIMEOUT ENDS')
 
     @Slot(str, name='onChangeTitle')
     def onChangeTitle(self, title):
@@ -38,6 +50,11 @@ class Widget(QWidget):
     @Slot(dict, name='onChangeDialogs')
     def onChangeDialogs(self, dialogs):
         self.log.info(f'New dialogs: {dialogs}')
+        self.__dialogsWidget.dialogs.clear()
+        for dialog in dialogs['items']:
+            item = QListWidgetItem(self.__dialogsWidget.dialogs)
+            item.setText(str(dialog['message']['id']) + '\n' + dialog['message']['body'])
+            self.__dialogsWidget.dialogs.addItem(item)
 
     @Slot(dict, name='onChangeMessages')
     def onChangeMessages(self, messages):

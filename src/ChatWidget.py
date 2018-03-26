@@ -4,14 +4,17 @@ from PyQt5.QtWidgets import (QWidget, QListWidget, QTextEdit, QVBoxLayout, QPush
 
 class ChatWidget(QWidget):
     log = logging.getLogger(name='CHatWidget')
+    messsages = None
+    sendButton = None
+    messageEdit = None
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.__messages = QListWidget(self)
-        self.__messageEdit = QTextEdit(self)
-        self.__sendButton = QPushButton(self)
-        self.__sendButton.setText('Send')
+        self.messages = QListWidget(self)
+        self.messageEdit = QTextEdit(self)
+        self.sendButton = QPushButton(self)
+        self.sendButton.setText('Send')
         self.setLayout(QVBoxLayout())
-        self.layout().addWidget(self.__messages)
-        self.layout().addWidget(self.__messageEdit)
-        self.layout().addWidget(self.__sendButton)
+        self.layout().addWidget(self.messages)
+        self.layout().addWidget(self.messageEdit)
+        self.layout().addWidget(self.sendButton)
