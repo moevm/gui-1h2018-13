@@ -22,12 +22,12 @@ class Widget(QWidget):
 
     updateTitle = Signal()
     updateDialogs = Signal(int, int, bool)
-    updateMessages = Signal(int, int)
+    updateMessages = Signal(int, int, int)
 
     @Slot(name='onInitialized')
     def onInitialized(self):
         self.updateTitle.emit()
-        self.updateMessages.emit(0, 10)
+        self.updateMessages.emit(0, 10, 183161122)
         self.updateDialogs.emit(0, 10, True)
 
     @Slot(str, name='onChangeTitle')

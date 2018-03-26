@@ -23,11 +23,11 @@ class VKApi(QObject):
 
     log = logging.getLogger(name='VKApi')
 
-    @Slot(int, int, name='onUpdateMessages')
-    def onUpdateMessages(self, offset, count):
+    @Slot(int, int, int, name='onUpdateMessages')
+    def onUpdateMessages(self, offset, count, user_id):
         @makeRequest
         def req():
-            messages = self.__api.messages.get(offset=offset, count=count, v=5.73)
+            messages = self.__api.messages.getHistory(user_id=user_id, offset=offset, count=count, v=5.73)
             self.log.info(f'messages: {messages}')
             self.changeMessages.emit(messages)
 
