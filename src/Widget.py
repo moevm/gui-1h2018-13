@@ -2,13 +2,14 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListWidgetItem
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListView
 from PyQt5.QtCore import QTimer
 
 from .ChatWidget import ChatWidget
 from .DialogsWidget import DialogsWidget
 from .LogInView import LogInView
 from .VKApi import VKApi
+from .Dialog import Dialog
 
 
 class Widget(QWidget):
@@ -20,7 +21,6 @@ class Widget(QWidget):
     __api = None
     __chatWidget = None
     __dialogsWidget = None
-    __updateTimer = None
 
     updateTitle = Signal()
     updateDialogs = Signal(int, int, bool)
@@ -29,18 +29,11 @@ class Widget(QWidget):
     @Slot(name='onInitialized')
     def onInitialized(self):
         self.updateTitle.emit()
-        self.updateDialogs.emit(0, 10, False)
-        self.__updateTimer = QTimer(self)
-        self.__updateTimer.setInterval(1000)
-        self.__updateTimer.timeout.connect(self.onTimeout)
-        self.__updateTimer.start()
 
-    @Slot(name='onTimeout')
-    def onTimeout(self):
-        self.log.info('\tTIMEOUT STARTS')
-        self.updateTitle.emit()
+    @Slot(name='onUpdateDialogsClicked')
+    def onUpdateDialogsClicked(self):
+        self.log.info('\tUPDATE')
         self.updateDialogs.emit(0, 10, False)
-        self.log.info('\tTIMEOUT ENDS')
 
     @Slot(str, name='onChangeTitle')
     def onChangeTitle(self, title):
@@ -52,8 +45,7 @@ class Widget(QWidget):
         self.log.info(f'New dialogs: {dialogs}')
         self.__dialogsWidget.dialogs.clear()
         for dialog in dialogs['items']:
-            item = QListWidgetItem(self.__dialogsWidget.dialogs)
-            item.setText(str(dialog['message']['id']) + '\n' + dialog['message']['body'])
+            item = Dialog(dialog['message'], self.__dialogsWidget.dialogs)
             self.__dialogsWidget.dialogs.addItem(item)
 
     @Slot(dict, name='onChangeMessages')
@@ -71,6 +63,7 @@ class Widget(QWidget):
         self.log.info('LogInView is to delete.')
         self.__chatWidget = ChatWidget(self)
         self.__dialogsWidget = DialogsWidget(self)
+        self.__dialogsWidget.updateButton.clicked.connect(self.onUpdateDialogsClicked)
         self.layout().addWidget(self.__dialogsWidget)
         self.layout().addWidget(self.__chatWidget)
 

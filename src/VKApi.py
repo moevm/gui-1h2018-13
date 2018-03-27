@@ -4,6 +4,7 @@ import vk
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
+from time import sleep
 
 from .utils import makeRequest
 
@@ -37,8 +38,17 @@ class VKApi(QObject):
     def onUpdateDialogs(self, offset, count, unread):
         @makeRequest
         def req():
-            dialogs = self.__api.messages.getDialogs(preview_length=30, offset=offset, count=count, unread=unread, v=5.73)
+            dialogs = self.__api.messages.getDialogs(preview_length=30, offset=offset, count=count, v=5.73)
             self.log.info(f'dialogs: {dialogs}')
+            self.log.info('Load names...')
+            for item in dialogs['items']:
+                user = self.__api.users.get(v=5.73, user_ids=item['message']['user_id'], fields='photo_50')[0]
+                item['message']['photo_50'] = user['photo_50']
+                item['message']['first_name'] = user['first_name']
+                item['message']['last_name'] = user['last_name']
+                self.log.info(f'Now user: {item}')
+                sleep(0.3)
+
             self.changeDialogs.emit(dialogs)
 
         req()
