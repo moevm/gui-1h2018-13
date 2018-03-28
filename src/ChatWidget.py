@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import (QWidget, QListWidget, QTextEdit, QVBoxLayout, QPush
 class ChatWidget(QWidget):
     log = logging.getLogger(name='CHatWidget')
     messsages = None
+    userId = None
     sendButton = None
     messageEdit = None
 

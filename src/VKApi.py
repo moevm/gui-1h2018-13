@@ -1,6 +1,7 @@
 import logging
 
 import vk
+import random
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
@@ -21,6 +22,7 @@ class VKApi(QObject):
     changeTitle = Signal(str)
     changeDialogs = Signal(dict)
     changeMessages = Signal(dict)
+    messageSent = Signal()
 
     log = logging.getLogger(name='VKApi')
 
@@ -28,17 +30,28 @@ class VKApi(QObject):
     def onUpdateMessages(self, offset, count, user_id):
         @makeRequest
         def req():
+            sleep(0.1)
             messages = self.__api.messages.getHistory(user_id=user_id, offset=offset, count=count, v=5.73)
             self.log.info(f'messages: {messages}')
             self.changeMessages.emit(messages)
 
         req()
 
+    @Slot(str, int, name='onSendMessage')
+    def onSendMessage(self, message, to):
+        @makeRequest
+        def req():
+            sleep(0.1)
+            self.__api.messsages.send(message=message, user_id=to, peer_id=to, v=5.73, random_id=random.randint(0, 100000))
+            self.messageSent.emit()
+
+        req()
     @Slot(int, int, bool, name='onUpdateDialogs')
     def onUpdateDialogs(self, offset, count, unread):
         @makeRequest
         def req():
             dialogs = self.__api.messages.getDialogs(preview_length=30, offset=offset, count=count, v=5.73)
+            dialogs['items'] = [item for item in dialogs['items'] if 'chat_id' not in item['message']]
             self.log.info(f'dialogs: {dialogs}')
             self.log.info('Load names...')
             for item in dialogs['items']:

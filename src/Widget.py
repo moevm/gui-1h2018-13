@@ -2,7 +2,7 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListView
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListWidgetItem
 from PyQt5.QtCore import QTimer
 
 from .ChatWidget import ChatWidget
@@ -21,6 +21,9 @@ class Widget(QWidget):
     __api = None
     __chatWidget = None
     __dialogsWidget = None
+    _loadPerOnce = 20
+    _loadDialogsOffset = 0
+    _loadMessagesOffset = 0
 
     updateTitle = Signal()
     updateDialogs = Signal(int, int, bool)
@@ -33,7 +36,7 @@ class Widget(QWidget):
     @Slot(name='onUpdateDialogsClicked')
     def onUpdateDialogsClicked(self):
         self.log.info('\tUPDATE')
-        self.updateDialogs.emit(0, 10, False)
+        self.updateDialogs.emit(self._loadDialogsOffset, self._loadPerOnce, False)
 
     @Slot(str, name='onChangeTitle')
     def onChangeTitle(self, title):
@@ -51,6 +54,28 @@ class Widget(QWidget):
     @Slot(dict, name='onChangeMessages')
     def onChangeMessages(self, messages):
         self.log.info(f'New messages: {messages}')
+        for message in messages['items']:
+            item = QListWidgetItem(self.__chatWidget.messages)
+            item.setText(message['body'])
+            item.setTextAlignment(2 if message['out'] == 1 else 1)
+            self.__chatWidget.messages.addItem(item)
+
+    @Slot(QListWidgetItem, name='onItemPressed')
+    def onItemPressed(self, dialog: Dialog):
+        self.__dialogsWidget.userId = dialog.message['user_id']
+        if not dialog.message['user_id'] == self.__chatWidget.userId:
+            self.__chatWidget.userId = dialog.message['user_id']
+            self.updateMessages.emit(self._loadMessagesOffset, self._loadPerOnce, dialog.message['user_id'])
+
+    @Slot(name='onMessageSent')
+    def onMessageSent(self):
+        self.updateMessages.emit(self._loadMessagesOffset, self._loadPerOnce, self.__chatWidget.userId)
+
+    @Slot(name='onSendPressed')
+    def onSendPressed(self):
+        message = self.__chatWidget.messageEdit.toPlainText()
+        self.__api.onSendMessage(message, self.__chatWidget.userId)
+        self.__chatWidget.messageEdit.setText('')
 
     @Slot(name='closeLogInView')
     def closeLogInView(self):
@@ -63,7 +88,10 @@ class Widget(QWidget):
         self.log.info('LogInView is to delete.')
         self.__chatWidget = ChatWidget(self)
         self.__dialogsWidget = DialogsWidget(self)
+        self.__chatWidget.sendButton.clicked.connect(self.onSendPressed)
+        self.__dialogsWidget.dialogs.itemClicked.connect(self.onItemPressed)
         self.__dialogsWidget.updateButton.clicked.connect(self.onUpdateDialogsClicked)
+        self.__api.messageSent.connect(self.onMessageSent)
         self.layout().addWidget(self.__dialogsWidget)
         self.layout().addWidget(self.__chatWidget)
 

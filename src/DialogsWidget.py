@@ -1,5 +1,6 @@
 import logging
-from PyQt5.QtWidgets import (QWidget, QListWidget, QVBoxLayout, QPushButton)
+from PyQt5.QtWidgets import QWidget, QListWidget, QVBoxLayout, QPushButton
+from PyQt5.QtCore import QSize
 
 
 class DialogsWidget(QWidget):
@@ -7,6 +8,7 @@ class DialogsWidget(QWidget):
     dialogs = None
     findDialogButton = None
     updateButton = None
+    userId = None
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -15,6 +17,7 @@ class DialogsWidget(QWidget):
         self.updateButton = QPushButton(self)
         self.updateButton.setText('Update dialogs.')
         self.findDialogButton.setText('Start Dialog')
+        self.dialogs.setIconSize(QSize(50, 50))
         self.setLayout(QVBoxLayout())
         self.layout().addWidget(self.dialogs)
         self.layout().addWidget(self.findDialogButton)
