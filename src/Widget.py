@@ -54,6 +54,7 @@ class Widget(QWidget):
     @Slot(dict, name='onChangeMessages')
     def onChangeMessages(self, messages):
         self.log.info(f'New messages: {messages}')
+        self.__chatWidget.messages.clear()
         for message in messages['items']:
             item = QListWidgetItem(self.__chatWidget.messages)
             item.setText(message['body'])

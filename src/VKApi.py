@@ -42,7 +42,7 @@ class VKApi(QObject):
         @makeRequest
         def req():
             sleep(0.1)
-            self.__api.messsages.send(message=message, user_id=to, peer_id=to, v=5.73, random_id=random.randint(0, 100000))
+            self.__api.messages.send(message=message, user_id=to, peer_id=to, v=5.73, random_id=random.randint(0, 100000))
             self.messageSent.emit()
 
         req()
