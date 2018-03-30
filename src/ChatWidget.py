@@ -1,10 +1,11 @@
 import logging
-from PyQt5.QtWidgets import (QWidget, QListWidget, QTextEdit, QVBoxLayout, QPushButton)
+
+from PyQt5.QtWidgets import QWidget, QListWidget, QTextEdit, QVBoxLayout, QPushButton
 
 
 class ChatWidget(QWidget):
     log = logging.getLogger(name='CHatWidget')
-    messsages = None
+    messages = None
     userId = None
     sendButton = None
     messageEdit = None

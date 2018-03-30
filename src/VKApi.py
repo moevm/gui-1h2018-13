@@ -1,11 +1,11 @@
 import logging
+import random
+from time import sleep
 
 import vk
-import random
 from PyQt5.QtCore import QObject
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
-from time import sleep
 
 from .utils import makeRequest
 
@@ -30,9 +30,8 @@ class VKApi(QObject):
     def onUpdateMessages(self, offset, count, user_id):
         @makeRequest
         def req():
-            sleep(0.1)
             messages = self.__api.messages.getHistory(user_id=user_id, offset=offset, count=count, v=5.73)
-            self.log.info(f'messages: {messages}')
+            self.log.info('messages: {}'.format(messages))
             self.changeMessages.emit(messages)
 
         req()
@@ -52,15 +51,18 @@ class VKApi(QObject):
         def req():
             dialogs = self.__api.messages.getDialogs(preview_length=30, offset=offset, count=count, v=5.73)
             dialogs['items'] = [item for item in dialogs['items'] if 'chat_id' not in item['message']]
-            self.log.info(f'dialogs: {dialogs}')
+            self.log.info('dialogs: {}'.format(dialogs))
             self.log.info('Load names...')
-            for item in dialogs['items']:
-                user = self.__api.users.get(v=5.73, user_ids=item['message']['user_id'], fields='photo_50')[0]
-                item['message']['photo_50'] = user['photo_50']
-                item['message']['first_name'] = user['first_name']
-                item['message']['last_name'] = user['last_name']
-                self.log.info(f'Now user: {item}')
-                sleep(0.3)
+            ids = dialogs['items'] = [str(item['message']['user_id']) for item in dialogs['items']]
+            self.log.info('IDS: {}'.format(ids))
+            usersInfo = self.__api.users.get(user_ids=','.join(ids), fields='photo_50', v=5.73)
+            # for item in dialogs['items']:
+            #     user = self.__api.users.get(v=5.73, user_ids=item['message']['user_id'], fields='photo_50')[0]
+            #     item['message']['photo_50'] = user['photo_50']
+            #     item['message']['first_name'] = user['first_name']
+            #     item['message']['last_name'] = user['last_name']
+            #     self.log.info(f'Now user: {item}')
+            #     sleep(0.3)
 
             self.changeDialogs.emit(dialogs)
 
@@ -72,7 +74,7 @@ class VKApi(QObject):
         def req():
             answer = self.__api.account.getProfileInfo(v=5.73)
             title = answer['first_name'] + ' ' + answer['last_name']
-            self.log.info(f'title: {title}')
+            self.log.info('title: {}'.format(title))
             self.changeTitle.emit(title)
 
         req()
@@ -80,11 +82,11 @@ class VKApi(QObject):
     @Slot(str, name='takeToken')
     def takeToken(self, token):
         self.__token = token
-        self.log.info(f'Token in API: {self.__token}')
+        self.log.info('Token in API: {}'.format(self.__token))
         self.__session = vk.Session(access_token=token)
-        self.log.info(f'Session: {self.__session}')
+        self.log.info('Session: {}'.format(self.__session))
         self.__api = vk.API(self.__session)
-        self.log.info(f'API: {self.__api}')
+        self.log.info('API: {}'.format(self.__api))
         self.initialized.emit()
 
     def __init__(self, parent=None):

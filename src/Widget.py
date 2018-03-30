@@ -3,13 +3,12 @@ import logging
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListWidgetItem
-from PyQt5.QtCore import QTimer
 
 from .ChatWidget import ChatWidget
+from .Dialog import Dialog
 from .DialogsWidget import DialogsWidget
 from .LogInView import LogInView
 from .VKApi import VKApi
-from .Dialog import Dialog
 
 
 class Widget(QWidget):
@@ -40,12 +39,12 @@ class Widget(QWidget):
 
     @Slot(str, name='onChangeTitle')
     def onChangeTitle(self, title):
-        self.log.info(f'New title: {str}')
+        self.log.info('New title: {}'.format(str))
         self.setWindowTitle(title)
 
     @Slot(dict, name='onChangeDialogs')
     def onChangeDialogs(self, dialogs):
-        self.log.info(f'New dialogs: {dialogs}')
+        self.log.info('New dialogs: {}'.format(dialogs))
         self.__dialogsWidget.dialogs.clear()
         for dialog in dialogs['items']:
             item = Dialog(dialog['message'], self.__dialogsWidget.dialogs)
@@ -53,7 +52,7 @@ class Widget(QWidget):
 
     @Slot(dict, name='onChangeMessages')
     def onChangeMessages(self, messages):
-        self.log.info(f'New messages: {messages}')
+        self.log.info('New messages: {}'.format(messages))
         self.__chatWidget.messages.clear()
         for message in messages['items']:
             item = QListWidgetItem(self.__chatWidget.messages)

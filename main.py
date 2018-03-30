@@ -1,6 +1,8 @@
-import sys
 import logging
+import sys
+
 from PyQt5.QtWidgets import QApplication
+
 from src.Widget import Widget
 
 

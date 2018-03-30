@@ -4,7 +4,7 @@ from threading import Thread
 def makeRequest(function, *args, **kwargs):
     """
     Runs function in a new thread. easy peasy.
-    make reques async like without loop.
+    make request async like without loop.
     """
 
     def newFunc(*args, **kwargs):

@@ -1,7 +1,8 @@
 import logging
-from PyQt5.QtCore import pyqtSlot as Slot
-from PyQt5.QtCore import pyqtSignal as Signal
+
 from PyQt5.QtCore import QUrl, QUrlQuery
+from PyQt5.QtCore import pyqtSignal as Signal
+from PyQt5.QtCore import pyqtSlot as Slot
 from PyQt5.QtWebEngineWidgets import QWebEngineView
 
 
@@ -27,7 +28,7 @@ class LogInView(QWebEngineView):
         """
         url = QUrl(newUrl.toString().replace('#', '?'))
 
-        self.log.info(f'url was changed to {url.toString()}')
+        self.log.info('url was changed to {}'.format(url.toString()))
         if url.hasQuery():
             query = QUrlQuery(url.query())
             if query.hasQueryItem('access_token'):
