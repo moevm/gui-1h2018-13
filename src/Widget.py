@@ -39,7 +39,7 @@ class Widget(QWidget):
 
     @Slot(str, name='onChangeTitle')
     def onChangeTitle(self, title):
-        self.log.info('New title: {}'.format(str))
+        self.log.info('New title: {}'.format(title))
         self.setWindowTitle(title)
 
     @Slot(dict, name='onChangeDialogs')

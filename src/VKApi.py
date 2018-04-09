@@ -53,16 +53,15 @@ class VKApi(QObject):
             dialogs['items'] = [item for item in dialogs['items'] if 'chat_id' not in item['message']]
             self.log.info('dialogs: {}'.format(dialogs))
             self.log.info('Load names...')
-            ids = dialogs['items'] = [str(item['message']['user_id']) for item in dialogs['items']]
+            ids = [str(item['message']['user_id']) for item in dialogs['items']]
             self.log.info('IDS: {}'.format(ids))
             usersInfo = self.__api.users.get(user_ids=','.join(ids), fields='photo_50', v=5.73)
-            # for item in dialogs['items']:
-            #     user = self.__api.users.get(v=5.73, user_ids=item['message']['user_id'], fields='photo_50')[0]
-            #     item['message']['photo_50'] = user['photo_50']
-            #     item['message']['first_name'] = user['first_name']
-            #     item['message']['last_name'] = user['last_name']
-            #     self.log.info(f'Now user: {item}')
-            #     sleep(0.3)
+            
+            for dialogItem , item in zip(dialogs['items'], usersInfo):
+                dialogItem['message']['photo_50'] = item['photo_50']
+                dialogItem['message']['first_name'] = item['first_name']
+                dialogItem['message']['last_name'] = item['last_name']
+                self.log.info('Dialog item now: {}'.format(dialogItem))
 
             self.changeDialogs.emit(dialogs)
 
