@@ -2,7 +2,7 @@ import logging
 
 from PyQt5.QtCore import pyqtSignal as Signal
 from PyQt5.QtCore import pyqtSlot as Slot
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListWidgetItem
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QListWidgetItem, QPushButton
 
 from .ChatWidget import ChatWidget
 from .Dialog import Dialog
@@ -20,9 +20,14 @@ class Widget(QWidget):
     __api = None
     __chatWidget = None
     __dialogsWidget = None
+    _loadPerOnceMin = 10
+    _loadPerOnceMax = 1000
+    _laodChangeStep = 10
     _loadPerOnce = 20
     _loadDialogsOffset = 0
     _loadMessagesOffset = 0
+    __loadMoreButton = None
+    __loadLessButton = None
 
     updateTitle = Signal()
     updateDialogs = Signal(int, int, bool)
@@ -77,6 +82,24 @@ class Widget(QWidget):
         self.__api.onSendMessage(message, self.__chatWidget.userId)
         self.__chatWidget.messageEdit.setText('')
 
+    @Slot(name='onLoadMoreButtonPressed')
+    def onLoadMoreButtonPressed(self):
+        self._loadPerOnce += self._laodChangeStep
+        if self._loadPerOnce > self._loadPerOnceMax:
+            self._loadPerOnce -= self._laodChangeStep
+        self.updateMessages.emit(self._loadMessagesOffset, self._loadPerOnce, self.__chatWidget.userId)
+        self.updateDialogs.emit(self._loadDialogsOffset, self._loadPerOnce, False)
+        self.log.info('Currently data loaded: {}'.format(self._loadPerOnce))
+
+    @Slot(name='onLoadLessButtonPressed')
+    def onLoadLessButtonPressed(self):
+        self._loadPerOnce -= self._laodChangeStep
+        if self._loadPerOnce < self._loadPerOnceMin:
+            self._loadPerOnce += self._laodChangeStep
+        self.updateMessages.emit(self._loadMessagesOffset, self._loadPerOnce, self.__chatWidget.userId)
+        self.updateDialogs.emit(self._loadDialogsOffset, self._loadPerOnce, False)
+        self.log.info('Currently data loaded: {}'.format(self._loadPerOnce))
+
     @Slot(name='closeLogInView')
     def closeLogInView(self):
         """
@@ -88,10 +111,16 @@ class Widget(QWidget):
         self.log.info('LogInView is to delete.')
         self.__chatWidget = ChatWidget(self)
         self.__dialogsWidget = DialogsWidget(self)
+        self.__loadMoreButton = QPushButton('Load more data', self)
+        self.__loadLessButton = QPushButton('Load less data', self)
+        self.__loadMoreButton.clicked.connect(self.onLoadMoreButtonPressed)
+        self.__loadLessButton.clicked.connect(self.onLoadLessButtonPressed)
         self.__chatWidget.sendButton.clicked.connect(self.onSendPressed)
         self.__dialogsWidget.dialogs.itemClicked.connect(self.onItemPressed)
         self.__dialogsWidget.updateButton.clicked.connect(self.onUpdateDialogsClicked)
         self.__api.messageSent.connect(self.onMessageSent)
+        self.__dialogsWidget.layout().addWidget(self.__loadMoreButton)
+        self.__dialogsWidget.layout().addWidget(self.__loadLessButton)
         self.layout().addWidget(self.__dialogsWidget)
         self.layout().addWidget(self.__chatWidget)
 

@@ -11,11 +11,15 @@ class Dialog(QListWidgetItem):
     def __init__(self, message, parent=None):
         super().__init__(parent)
         self.message = message
-        self.log.info("Load image from: {}, for {}".format(message['photo_50'],
-                                                           message['first_name'] + ' ' + message['last_name']))
-        data = urllib.urlopen(message['photo_50']).read()
-        pixmap = QPixmap()
-        pixmap.loadFromData(data)
-        icon = QIcon(pixmap)
-        self.setIcon(icon)
-        self.setText(message['first_name'] + ' ' + message['last_name'] + ':\n' + message['body'])
+        try:
+            self.log.info("Load image from: {}, for {}".format(message['photo_50'],
+                                                               message['first_name'] + ' ' + message['last_name']))
+            data = urllib.urlopen(message['photo_50']).read()
+            pixmap = QPixmap()
+            pixmap.loadFromData(data)
+            icon = QIcon(pixmap)
+            self.setIcon(icon)
+            self.setText(message['first_name'] + ' ' + message['last_name'] + ':\n' + message['body'])
+        except Exception:
+            self.log.info('Bots are not supported')
+            
