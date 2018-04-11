@@ -23,7 +23,7 @@ source ./venv/bin/activate
 ```
 * Загрузить зависимости:
 ```
-pip install vk, PyQt5
+pip install vk PyQt5
 ```
 * Запустить программу:
 ```
@@ -47,7 +47,7 @@ virtualenv venv
 ```
 * Загрузить зависимости:
 ```
-pip install vk, PyQt5
+pip install vk PyQt5
 ```
 * Запустить программу:
 ```
