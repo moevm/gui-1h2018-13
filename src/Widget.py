@@ -8,6 +8,7 @@ from .ChatWidget import ChatWidget
 from .Dialog import Dialog
 from .DialogsWidget import DialogsWidget
 from .LogInView import LogInView
+from .SearchWidget import SearchWidget
 from .VKApi import VKApi
 
 
@@ -28,10 +29,12 @@ class Widget(QWidget):
     _loadMessagesOffset = 0
     __loadMoreButton = None
     __loadLessButton = None
+    __searchWidget = None
 
     updateTitle = Signal()
     updateDialogs = Signal(int, int, bool)
     updateMessages = Signal(int, int, int)
+    searchText = Signal(int, str)
 
     @Slot(name='onInitialized')
     def onInitialized(self):
@@ -100,6 +103,22 @@ class Widget(QWidget):
         self.updateDialogs.emit(self._loadDialogsOffset, self._loadPerOnce, False)
         self.log.info('Currently data loaded: {}'.format(self._loadPerOnce))
 
+    @Slot(name='onSearchButtonClicked')
+    def onSearchButtonClicked(self):
+        text = self.__searchWidget.searchText.toPlainText()
+        self.log.info('Search for "{}"'.format(text))
+        self.searchText.emit(self._loadPerOnce, text)
+
+    @Slot(list, name='onTextFound')
+    def onTextFound(self, items):
+        self.__searchWidget.resultList.clear()
+        with open('search.result', 'w') as file:
+            for item in items:
+                string = '{} {}: {}'.format(item['first_name'], item['last_name'], item['body'])
+                self.__searchWidget.resultList.addItem(string)
+                file.write(string + '\n')
+
+
     @Slot(name='closeLogInView')
     def closeLogInView(self):
         """
@@ -113,6 +132,7 @@ class Widget(QWidget):
         self.__dialogsWidget = DialogsWidget(self)
         self.__loadMoreButton = QPushButton('Load more data', self)
         self.__loadLessButton = QPushButton('Load less data', self)
+        self.__searchWidget = SearchWidget(self)
         self.__loadMoreButton.clicked.connect(self.onLoadMoreButtonPressed)
         self.__loadLessButton.clicked.connect(self.onLoadLessButtonPressed)
         self.__chatWidget.sendButton.clicked.connect(self.onSendPressed)
@@ -121,8 +141,12 @@ class Widget(QWidget):
         self.__api.messageSent.connect(self.onMessageSent)
         self.__dialogsWidget.layout().addWidget(self.__loadMoreButton)
         self.__dialogsWidget.layout().addWidget(self.__loadLessButton)
+        self.__searchWidget.searchButton.clicked.connect(self.onSearchButtonClicked)
+        self.searchText.connect(self.__api.onSearchText)
+        self.__api.textFound.connect(self.onTextFound)
         self.layout().addWidget(self.__dialogsWidget)
         self.layout().addWidget(self.__chatWidget)
+        self.layout().addWidget(self.__searchWidget)
 
     def __init__(self, parent=None):
         super().__init__(parent)
