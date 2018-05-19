@@ -1,5 +1,6 @@
 .idea/
 .vscode/
+search.result # search result temp file.
 
 # C++ objects and libs
 
